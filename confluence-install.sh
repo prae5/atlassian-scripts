@@ -14,11 +14,12 @@ echo "Confluence database password:"
 read dbpass
 
 #some settings
-confluenceversion="3.3"
+confluenceversion="3.4"
 confluencebuild="confluence-$confluenceversion"
 confluencedownload="$confluencebuild.tar.gz"
 
 # install some utilities
+sudo apt-get update -y
 sudo apt-get install unzip ed -y
 sudo apt-get install apache2 -y
 sudo apt-get install openjdk-6-jdk -y
