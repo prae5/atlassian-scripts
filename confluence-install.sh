@@ -18,6 +18,47 @@ confluenceversion="3.3"
 confluencebuild="confluence-$confluenceversion"
 confluencedownload="$confluencebuild.tar.gz"
 
+# install some utilities
+sudo apt-get install unzip ed -y
+sudo apt-get install apache2 -y
+sudo apt-get install openjdk-6-jdk -y
+sudo apt-get install tomcat6 tomcat6-user -y
+sudo apt-get install libapr1 libtcnative-1 libapache2-mod-jk -y
+
+# install postgresql
+sudo apt-get install postgresql -y
+
+# enable the SSL module in apache
+sudo a2enmod ssl
+sudo /etc/init.d/apache2 restart
+
+# generate certificates for the web server:
+openssl genrsa -des3 -out $servername.key 1024
+openssl rsa -in $servername.key -out $servername.key.insecure
+mv $servername.key $servername.key.secure
+mv $servername.key.insecure $servername.key
+openssl req -new -key $servername.key -out $servername.csr
+
+# generate self-signed certificate
+openssl x509 -req -days 365 -in $servername.csr -signkey $servername.key -out $servername.crt
+
+# copy certificates to proper location
+sudo cp $servername.crt /etc/ssl/certs
+sudo cp $servername.key /etc/ssl/private
+
+# point apache to the correct certificates
+sudo sed -i "s/ssl-cert-snakeoil.pem/$servername.crt/" /etc/apache2/sites-available/default-ssl
+sudo sed -i "s/ssl-cert-snakeoil.key/$servername.key/" /etc/apache2/sites-available/default-ssl
+
+# update the server name and admin email
+sudo sed -i "s/webmaster@localhost/$adminemail/" /etc/apache2/sites-available/default-ssl
+sudo sed -i "3a\        ServerName $servername" /etc/apache2/sites-available/default-ssl
+
+# enable secure site
+sudo a2ensite default-ssl
+sudo /etc/init.d/apache2 reload
+
+
 # create a Confluence user
 sudo adduser --system --shell /bin/sh --gecos 'Confluence owner' --group --disabled-password --home /srv/confluence confluence
 
