@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Script for installing Atlassian Jira 4.1.2 on a minimal Ubuntu 10.04 server
+#
+
 #get some parameters
 echo "server name:"
 read servername
